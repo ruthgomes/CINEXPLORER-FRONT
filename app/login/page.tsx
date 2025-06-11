@@ -1,7 +1,5 @@
 "use client"
 
-import type React from "react"
-
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -16,7 +14,7 @@ import { useAuth } from "@/components/auth-provider"
 export default function LoginPage() {
   const router = useRouter()
   const { toast } = useToast()
-  const { login } = useAuth()
+  const { login, register } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [loginData, setLoginData] = useState({
     email: "",
@@ -60,10 +58,9 @@ export default function LoginPage() {
     }
   }
 
-  const handleRegisterSubmit = (e: React.FormEvent) => {
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
-
+    
     // Validate password match
     if (registerData.password !== registerData.confirmPassword) {
       toast({
@@ -71,18 +68,40 @@ export default function LoginPage() {
         title: "Erro no cadastro",
         description: "As senhas não coincidem. Tente novamente.",
       })
-      setIsLoading(false)
       return
     }
 
-    // Mock registration - in a real app, this would call an API
-    setTimeout(() => {
+    setIsLoading(true)
+
+    try {
+      const success = await register(
+        registerData.name,
+        registerData.email,
+        registerData.password
+      )
+
+      if (success) {
+        toast({
+          title: "Cadastro realizado com sucesso!",
+          description: "Você foi automaticamente logado.",
+        })
+        router.push("/")
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Erro no cadastro",
+          description: "Este email já está em uso. Tente outro email.",
+        })
+      }
+    } catch (error) {
       toast({
-        title: "Cadastro realizado com sucesso!",
-        description: "Sua conta foi criada. Faça login para continuar.",
+        variant: "destructive",
+        title: "Erro no cadastro",
+        description: "Ocorreu um erro inesperado. Tente novamente mais tarde.",
       })
+    } finally {
       setIsLoading(false)
-    }, 1500)
+    }
   }
 
   return (
@@ -144,8 +163,7 @@ export default function LoginPage() {
 
                 <div className="mt-4 text-center text-sm">
                   <p className="text-muted-foreground">Para testar, use:</p>
-                  <p className="text-xs text-muted-foreground">Admin: admin@example.com / password</p>
-                  <p className="text-xs text-muted-foreground">Usuário: user@example.com / password</p>
+                  <p className="text-xs text-muted-foreground">Admin: admin@cine.com / admin123</p>
                 </div>
               </form>
             </TabsContent>
@@ -179,6 +197,7 @@ export default function LoginPage() {
                     id="register-password"
                     type="password"
                     required
+                    minLength={6}
                     value={registerData.password}
                     onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
                   />
@@ -189,6 +208,7 @@ export default function LoginPage() {
                     id="confirm-password"
                     type="password"
                     required
+                    minLength={6}
                     value={registerData.confirmPassword}
                     onChange={(e) => setRegisterData({ ...registerData, confirmPassword: e.target.value })}
                   />

@@ -1,19 +1,19 @@
 "use client"
 
-import type React from "react"
-
 import { createContext, useContext, useState, useEffect } from "react"
 
 type User = {
   id: string
   name: string
   email: string
+  password: string
   role: "admin" | "user"
 } | null
 
 type AuthContextType = {
   user: User
   login: (email: string, password: string) => Promise<boolean>
+  register: (name: string, email: string, password: string) => Promise<boolean>
   logout: () => void
   isLoading: boolean
 }
@@ -21,6 +21,7 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType>({
   user: null,
   login: async () => false,
+  register: async () => false,
   logout: () => {},
   isLoading: true,
 })
@@ -40,39 +41,97 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(false)
   }, [])
 
-  const login = async (email: string, password: string) => {
-    // Mock login - in a real app, this would call an API
-    setIsLoading(true)
-
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
-    if (email === "admin@example.com" && password === "password") {
-      const userData = {
-        id: "1",
-        name: "Admin User",
-        email: "admin@example.com",
-        role: "admin" as const,
-      }
-      setUser(userData)
-      localStorage.setItem("user", JSON.stringify(userData))
-      setIsLoading(false)
-      return true
-    } else if (email === "user@example.com" && password === "password") {
-      const userData = {
-        id: "2",
-        name: "Regular User",
-        email: "user@example.com",
-        role: "user" as const,
-      }
-      setUser(userData)
-      localStorage.setItem("user", JSON.stringify(userData))
-      setIsLoading(false)
-      return true
+  // Função para obter todos os usuários cadastrados
+  const getUsers = (): User[] => {
+    if (typeof window !== 'undefined') {
+      const storedUsers = localStorage.getItem("users")
+      return storedUsers ? JSON.parse(storedUsers) : []
     }
+    return []
+  }
 
-    setIsLoading(false)
-    return false
+  const login = async (email: string, password: string) => {
+    setIsLoading(true)
+    
+    try {
+      // Simulate API call delay
+      await new Promise((resolve) => setTimeout(resolve, 500))
+      
+      const users = getUsers()
+      const foundUser = users.find(user => 
+        user.email === email && user.password === password
+      )
+
+      if (foundUser) {
+        setUser(foundUser)
+        localStorage.setItem("user", JSON.stringify(foundUser))
+        setIsLoading(false)
+        return true
+      }
+
+      // Check for default admin user (only if no users exist yet)
+      if (users.length === 0 && email === "admin@cine.com" && password === "admin123") {
+        const adminUser = {
+          id: "1",
+          name: "Admin User",
+          email: "admin@cine.com",
+          password: "admin123",
+          role: "admin" as const,
+        }
+        setUser(adminUser)
+        localStorage.setItem("user", JSON.stringify(adminUser))
+        localStorage.setItem("users", JSON.stringify([adminUser]))
+        setIsLoading(false)
+        return true
+      }
+
+      setIsLoading(false)
+      return false
+    } catch (error) {
+      setIsLoading(false)
+      return false
+    }
+  }
+
+  const register = async (name: string, email: string, password: string) => {
+    setIsLoading(true)
+    
+    try {
+      // Simulate API call delay
+      await new Promise((resolve) => setTimeout(resolve, 500))
+      
+      const users = getUsers()
+      
+      // Check if email already exists
+      const emailExists = users.some(user => user.email === email)
+      if (emailExists) {
+        setIsLoading(false)
+        return false
+      }
+
+      // Create new user
+      const newUser: User = {
+        id: Date.now().toString(),
+        name,
+        email,
+        password,
+        role: "user"
+      }
+
+      // Save new user to users list
+      const updatedUsers = [...users, newUser]
+      localStorage.setItem("users", JSON.stringify(updatedUsers))
+
+      // Automatically log in the new user
+      setUser(newUser)
+      localStorage.setItem("user", JSON.stringify(newUser))
+      
+      setIsLoading(false)
+      return true
+    } catch (error) {
+      setIsLoading(false)
+      return false
+    }
   }
 
   const logout = () => {
@@ -80,5 +139,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem("user")
   }
 
-  return <AuthContext.Provider value={{ user, login, logout, isLoading }}>{children}</AuthContext.Provider>
+  return (
+    <AuthContext.Provider value={{ user, login, register, logout, isLoading }}>
+      {children}
+    </AuthContext.Provider>
+  )
 }
