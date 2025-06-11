@@ -41,7 +41,7 @@ const promotions: Promo[] = [
     longDescription:
       "Aproveite a melhor promoção da semana! Todos os ingressos com 50% de desconto às terças-feiras em todos os cinemas da rede CineXplorer. Válido para qualquer sessão, filme e tipo de sala.",
     type: "daily",
-    image: "/placeholder.svg?height=600&width=1200",
+    image: "/combo-familia.png",
     day: "Terça-feira",
     color: "primary",
     conditions: [
@@ -61,7 +61,7 @@ const promotions: Promo[] = [
     longDescription:
       "Comece a semana com o pé direito! Na compra de dois ingressos para qualquer sessão às segundas-feiras, ganhe uma pipoca grande gratuitamente. Promoção válida em todos os cinemas da rede CineXplorer.",
     type: "daily",
-    image: "/placeholder.svg?height=600&width=1200",
+    image: "/combo-familia.png",
     day: "Segunda-feira",
     color: "amber",
     conditions: [
@@ -81,7 +81,7 @@ const promotions: Promo[] = [
     longDescription:
       "Nas quintas-feiras, traga um acompanhante sem pagar a mais! Na compra de um ingresso para sessões após às 21h, você ganha outro ingresso gratuitamente. Ideal para casais ou amigos que querem economizar.",
     type: "daily",
-    image: "/placeholder.svg?height=600&width=1200",
+    image: "/combo-familia.png",
     day: "Quinta-feira",
     color: "blue",
     conditions: [
@@ -101,7 +101,7 @@ const promotions: Promo[] = [
     longDescription:
       "Domingo é dia de família no cinema! Quanto mais pessoas vierem juntas, maior o desconto. Traga toda a família e economize até 30% no valor total dos ingressos para a mesma sessão.",
     type: "daily",
-    image: "/placeholder.svg?height=600&width=1200",
+    image: "/combo-familia.png",
     day: "Domingo",
     color: "green",
     conditions: [
@@ -121,7 +121,7 @@ const promotions: Promo[] = [
     longDescription:
       "Valorize o cinema nacional e documentários com 30% de desconto todas as quartas-feiras! Uma oportunidade para conhecer produções de qualidade com preços especiais.",
     type: "daily",
-    image: "/placeholder.svg?height=600&width=1200",
+    image: "/combo-familia.png",
     day: "Quarta-feira",
     color: "purple",
     conditions: [
@@ -141,7 +141,7 @@ const promotions: Promo[] = [
     longDescription:
       "O combo perfeito para toda a família! Economize com este pacote que inclui 4 ingressos, 2 pipocas grandes e 4 refrigerantes médios. Ideal para famílias que querem uma experiência completa no cinema.",
     type: "combo",
-    image: "/placeholder.svg?height=600&width=1200",
+    image: "/combo-familia.png",
     price: "R$ 149,90",
     savings: "Economia de R$ 50,00",
     conditions: [
@@ -161,7 +161,7 @@ const promotions: Promo[] = [
     longDescription:
       "Programa a dois com economia! Este combo inclui 2 ingressos, 1 pipoca grande para compartilhar e 2 refrigerantes médios. Perfeito para casais que querem aproveitar uma sessão de cinema juntos.",
     type: "combo",
-    image: "/placeholder.svg?height=600&width=1200",
+    image: "/combo-familia.png",
     price: "R$ 79,90",
     savings: "Economia de R$ 25,00",
     conditions: [
@@ -181,7 +181,7 @@ const promotions: Promo[] = [
     longDescription:
       "Uma experiência premium para momentos especiais! Este combo inclui 2 ingressos para salas VIP, 1 pipoca grande gourmet e 2 bebidas à sua escolha (incluindo opções alcoólicas). O programa perfeito para uma noite especial.",
     type: "combo",
-    image: "/placeholder.svg?height=600&width=1200",
+    image: "/combo-familia.png",
     price: "R$ 119,90",
     savings: "Economia de R$ 35,00",
     conditions: [
@@ -202,7 +202,7 @@ const promotions: Promo[] = [
     longDescription:
       "Perfeito para quem gosta de ir ao cinema sozinho! Este combo inclui 1 ingresso, 1 pipoca média e 1 refrigerante médio. Tenha uma experiência completa com o melhor custo-benefício.",
     type: "combo",
-    image: "/placeholder.svg?height=600&width=1200",
+    image: "/combo-familia.png",
     price: "R$ 39,90",
     savings: "Economia de R$ 15,00",
     conditions: [
@@ -221,7 +221,7 @@ const promotions: Promo[] = [
     longDescription:
       "Reúna a turma e economize! Este combo inclui 3 ingressos, 2 pipocas grandes para compartilhar e 3 refrigerantes médios. Ideal para grupos de amigos que querem curtir um filme juntos.",
     type: "combo",
-    image: "/placeholder.svg?height=600&width=1200",
+    image: "/combo-familia.png",
     price: "R$ 119,90",
     savings: "Economia de R$ 40,00",
     conditions: [
@@ -241,7 +241,7 @@ const promotions: Promo[] = [
     longDescription:
       "Estudantes pagam meia-entrada em qualquer sessão, qualquer dia da semana! Basta apresentar a carteirinha de estudante válida na entrada do cinema. Válido para estudantes de todos os níveis de ensino.",
     type: "special",
-    image: "/placeholder.svg?height=600&width=1200",
+    image: "/combo-familia.png",
     conditions: [
       "Válido para qualquer dia da semana e sessão",
       "Necessário apresentar carteirinha de estudante válida com foto",
@@ -259,7 +259,7 @@ const promotions: Promo[] = [
     longDescription:
       "Comemore seu aniversário no cinema! No dia do seu aniversário, você ganha um ingresso grátis e seus acompanhantes (até 3 pessoas) ganham 30% de desconto. Uma ótima maneira de celebrar seu dia especial.",
     type: "special",
-    image: "/placeholder.svg?height=600&width=1200",
+    image: "/combo-familia.png",
     conditions: [
       "Válido apenas no dia do aniversário (data exata)",
       "Necessário apresentar documento oficial com foto que comprove a data de nascimento",
@@ -277,7 +277,7 @@ const promotions: Promo[] = [
     longDescription:
       "Para os notívagos de plantão! Todas as sessões com início após às 23h têm 40% de desconto no valor do ingresso. Aproveite para assistir àquele filme que você tanto queria ver por um preço especial.",
     type: "special",
-    image: "/placeholder.svg?height=600&width=1200",
+    image: "/combo-familia.png",
     conditions: [
       "Válido apenas para sessões com início após às 23h",
       "Desconto de 40% sobre o valor do ingresso inteiro",
@@ -295,7 +295,7 @@ const promotions: Promo[] = [
     longDescription:
       "Torne-se membro do Clube CineXplorer e aproveite benefícios exclusivos durante o ano todo! Assinantes ganham 20% de desconto em todos os ingressos e combos, além de promoções exclusivas, pré-vendas e eventos especiais.",
     type: "special",
-    image: "/placeholder.svg?height=600&width=1200",
+    image: "/combo-familia.png",
     conditions: [
       "Assinatura anual com pagamento recorrente de R$ 19,90/mês",
       "Desconto de 20% em todos os ingressos e combos",

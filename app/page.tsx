@@ -142,7 +142,7 @@ export default function Home() {
           <div className="flex flex-col md:flex-row items-center justify-center gap-8">
             <div className="md:w-1/2 lg:w-1/3">
               <Image
-                src="/placeholder.svg?height=600&width=300"
+                src="/cinexplorer.png"
                 alt="CineXplorer App"
                 width={300}
                 height={600}

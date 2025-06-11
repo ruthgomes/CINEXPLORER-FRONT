@@ -13,11 +13,15 @@ import { useToast } from "@/components/ui/use-toast"
 import { Clock, Info, Ticket, X } from "lucide-react"
 import { mockMovies, mockCinemas, mockSessions, mockRooms, generateMockSeats } from "@/lib/mock-data"
 import type { Session, Seat, Movie, Cinema, Room } from "@/lib/types"
+// Primeiro, vamos importar o hook useAuth para verificar se o usuário está logado
+import { useAuth } from "@/components/auth-provider"
 
+// Modificar a função do componente para incluir o hook useAuth
 export default function SeatsPage() {
   const { id } = useParams()
   const router = useRouter()
   const { toast } = useToast()
+  const { user } = useAuth() // Adicionar o hook useAuth
   const [session, setSession] = useState<Session | null>(null)
   const [movie, setMovie] = useState<Movie | null>(null)
   const [cinema, setCinema] = useState<Cinema | null>(null)
@@ -80,6 +84,7 @@ export default function SeatsPage() {
     }, 0)
   }
 
+  // Modificar a função handleCheckout para verificar login e redirecionar para pagamento
   const handleCheckout = () => {
     if (selectedSeats.length === 0) {
       toast({
@@ -99,16 +104,49 @@ export default function SeatsPage() {
       return
     }
 
-    // In a real app, this would navigate to checkout with the selected seats and ticket types
-    toast({
-      title: "Redirecionando para o pagamento",
-      description: `${selectedSeats.length} ingresso(s) selecionado(s).`,
-    })
+    // Verificar se o usuário está logado
+    if (!user) {
+      // Salvar dados da seleção no localStorage para recuperar após login
+      localStorage.setItem(
+        "selectedSession",
+        JSON.stringify({
+          sessionId: id,
+          selectedSeats: selectedSeats,
+          ticketTypes: ticketTypes,
+          totalPrice: calculateTotal(),
+        }),
+      )
 
-    // Mock checkout success
-    setTimeout(() => {
-      router.push("/meus-ingressos")
-    }, 1500)
+      toast({
+        title: "Login necessário",
+        description: "Por favor, faça login para continuar com a compra.",
+      })
+
+      // Redirecionar para login com parâmetro de retorno
+      router.push(`/login?returnTo=/sessoes/${id}/pagamento`)
+      return
+    }
+
+    // Se estiver logado, redirecionar para a página de pagamento
+    // Salvar dados da seleção no localStorage
+    localStorage.setItem(
+      "checkoutData",
+      JSON.stringify({
+        sessionId: id,
+        movieId: movie?.id,
+        cinemaId: cinema?.id,
+        selectedSeats: selectedSeats,
+        ticketTypes: ticketTypes,
+        totalPrice: calculateTotal(),
+        movieTitle: movie?.title,
+        cinemaName: cinema?.name,
+        roomName: session?.roomName,
+        date: session?.date,
+        time: session?.time,
+      }),
+    )
+
+    router.push(`/sessoes/${id}/pagamento`)
   }
 
   if (!session || !movie || !cinema || !room) {

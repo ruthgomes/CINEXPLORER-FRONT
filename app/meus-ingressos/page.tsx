@@ -13,6 +13,7 @@ import { Calendar, Download, Film, MapPin, QrCode, Ticket, X } from "lucide-reac
 import { useAuth } from "@/components/auth-provider"
 import { mockTickets, mockMovies } from "@/lib/mock-data"
 import type { Ticket as TicketType } from "@/lib/types"
+import QRCode from "react-qr-code"
 
 export default function MyTicketsPage() {
   const router = useRouter()
@@ -70,9 +71,13 @@ export default function MyTicketsPage() {
   }
 
   const handleDownloadTicket = (ticket: TicketType) => {
+    // Open the ticket view page in a new tab for download/print
+    const ticketUrl = `/ingresso/${ticket.id}`
+    window.open(ticketUrl, "_blank")
+
     toast({
-      title: "Download iniciado",
-      description: "Seu ingresso está sendo baixado.",
+      title: "Ingresso aberto",
+      description: "Uma nova aba foi aberta com seu ingresso. Você pode visualizar, imprimir ou salvar como PDF.",
     })
   }
 
@@ -205,7 +210,11 @@ export default function MyTicketsPage() {
 
             <div className="flex justify-center mb-6">
               <div className="bg-white p-4 rounded-lg">
-                <QrCode className="h-48 w-48 text-black" />
+                <QRCode
+                  value={`${window.location.origin}/ingresso/${selectedTicket.id}`}
+                  size={192}
+                  style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+                />
               </div>
             </div>
 

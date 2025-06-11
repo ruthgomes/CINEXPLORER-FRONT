@@ -7,9 +7,11 @@ import { Button } from "@/components/ui/button"
 import { Calendar, Clock, Play } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { mockMovies } from "@/lib/mock-data"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 
 export default function HeroSection() {
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [isTrailerOpen, setIsTrailerOpen] = useState(false)
   const featuredMovies = mockMovies.slice(0, 3)
 
   useEffect(() => {
@@ -65,10 +67,28 @@ export default function HeroSection() {
             <Button asChild size="lg">
               <Link href={`/filmes/${featuredMovies[currentIndex].id}/ingressos`}>Comprar Ingressos</Link>
             </Button>
-            <Button variant="outline" size="lg" className="gap-2">
-              <Play className="h-4 w-4" />
-              Ver Trailer
-            </Button>
+            <Dialog open={isTrailerOpen} onOpenChange={setIsTrailerOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="lg" className="gap-2">
+                  <Play className="h-4 w-4" />
+                  Ver Trailer
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl w-full">
+                <DialogHeader>
+                  <DialogTitle>Trailer - {featuredMovies[currentIndex].title}</DialogTitle>
+                </DialogHeader>
+                <div className="aspect-video w-full">
+                  <iframe
+                    src={featuredMovies[currentIndex].trailerUrl || `https://www.youtube.com/embed/dQw4w9WgXcQ`}
+                    title={`Trailer de ${featuredMovies[currentIndex].title}`}
+                    className="w-full h-full rounded-lg"
+                    allowFullScreen
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  />
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 

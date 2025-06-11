@@ -68,21 +68,21 @@ export default function PromocoesPage() {
                   description="4 ingressos + 2 pipocas grandes + 4 refrigerantes por um preço especial."
                   price="R$ 149,90"
                   savings="Economia de R$ 50,00"
-                  image="/placeholder.svg?height=200&width=400"
+                  image="/combo-familia.png"
                 />
                 <ComboPromo
                   title="Combo Casal"
                   description="2 ingressos + 1 pipoca grande + 2 refrigerantes médios."
                   price="R$ 79,90"
                   savings="Economia de R$ 25,00"
-                  image="/placeholder.svg?height=200&width=400"
+                  image="/combo-familia.png"
                 />
                 <ComboPromo
                   title="Combo Premium"
                   description="2 ingressos VIP + 1 pipoca grande + 2 bebidas alcoólicas ou refrigerantes."
                   price="R$ 119,90"
                   savings="Economia de R$ 35,00"
-                  image="/placeholder.svg?height=200&width=400"
+                  image="/combo-familia.png"
                 />
               </div>
             </section>
@@ -166,35 +166,35 @@ export default function PromocoesPage() {
               description="4 ingressos + 2 pipocas grandes + 4 refrigerantes por um preço especial."
               price="R$ 149,90"
               savings="Economia de R$ 50,00"
-              image="/placeholder.svg?height=200&width=400"
+              image="/combo-familia.png"
             />
             <ComboPromo
               title="Combo Casal"
               description="2 ingressos + 1 pipoca grande + 2 refrigerantes médios."
               price="R$ 79,90"
               savings="Economia de R$ 25,00"
-              image="/placeholder.svg?height=200&width=400"
+              image="/combo-familia.png"
             />
             <ComboPromo
               title="Combo Premium"
               description="2 ingressos VIP + 1 pipoca grande + 2 bebidas alcoólicas ou refrigerantes."
               price="R$ 119,90"
               savings="Economia de R$ 35,00"
-              image="/placeholder.svg?height=200&width=400"
+              image="/combo-familia.png"
             />
             <ComboPromo
               title="Combo Solo"
               description="1 ingresso + 1 pipoca média + 1 refrigerante médio."
               price="R$ 39,90"
               savings="Economia de R$ 15,00"
-              image="/placeholder.svg?height=200&width=400"
+              image="/combo-familia.png"
             />
             <ComboPromo
               title="Combo Amigos"
               description="3 ingressos + 2 pipocas grandes + 3 refrigerantes médios."
               price="R$ 119,90"
               savings="Economia de R$ 40,00"
-              image="/placeholder.svg?height=200&width=400"
+              image="/combo-familia.png"
             />
           </div>
         </TabsContent>
@@ -288,7 +288,7 @@ function ComboPromo({ title, description, price, savings, image }: ComboPromoPro
   return (
     <Card className="overflow-hidden">
       <div className="relative h-48 w-full">
-        <Image src={image || "/placeholder.svg"} alt={title} fill className="object-cover" />
+        <Image src={image || "/combo-familia.jpg"} alt={title} fill className="object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
         <div className="absolute bottom-4 left-4 right-4">
           <h3 className="text-xl font-bold">{title}</h3>
