@@ -23,6 +23,34 @@ import { cn } from "@/lib/utils"
 import Image from "next/image"
 import { useLocalStorage } from "@/hooks/use-local-storage"
 
+interface Movie {
+  id: string;
+  title: string;
+  posterUrl: string;
+  classification: string;
+  genres: string[];
+  // adicione outras propriedades conforme necessário
+}
+
+interface Cinema {
+  id: string;
+  name: string;
+  address: string;
+  // adicione outras propriedades conforme necessário
+}
+
+interface Promotion {
+  slug: string;
+  title: string;
+  description: string;
+}
+
+interface SearchResults {
+  movies: Movie[];
+  cinemas: Cinema[];
+  promotions: Promotion[];
+}
+
 export default function Header() {
   const { user, logout } = useAuth()
   const pathname = usePathname()
@@ -30,11 +58,11 @@ export default function Header() {
   const [location, setLocation] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [showSearchResults, setShowSearchResults] = useState(false)
-  const [searchResults, setSearchResults] = useState({
-    movies: [],
-    cinemas: [],
-    promotions: [],
-  })
+  const [searchResults, setSearchResults] = useState<SearchResults>({
+  movies: [],
+  cinemas: [],
+  promotions: [],
+  });
 
   const [locationShared, setLocationShared] = useLocalStorage("locationShared", "false");
 
@@ -76,6 +104,7 @@ export default function Header() {
   }, [])
 
   useEffect(() => {
+  if (typeof window !== 'undefined') {
     const storedLocation = localStorage.getItem("userLocation")
     const locationPermissionAsked = localStorage.getItem("locationPermissionAsked")
     const locationShared = localStorage.getItem("locationShared")
@@ -88,12 +117,15 @@ export default function Header() {
     } else {
       setLocation("Selecionar local")
     }
-  }, [])
+  }
+}, [])
 
   const handleLocationSelect = (newLocation: string) => {
-    setLocation(newLocation)
+  setLocation(newLocation)
+  if (typeof window !== 'undefined') {
     localStorage.setItem("userLocation", newLocation)
   }
+}
 
   const isAdmin = user?.role === "admin"
 
@@ -101,7 +133,7 @@ export default function Header() {
   useEffect(() => {
     if (searchTerm.length > 0) {
       // Importar os dados mock
-      import("@/lib/mock-data").then(({ mockMovies, mockCinemas }) => {
+      import("@/lib/mock-data").then(({ mockMovies, mockCinemas }: { mockMovies: Movie[], mockCinemas: Cinema[] }) => {
         // Buscar filmes
         const filteredMovies = mockMovies
           .filter(
@@ -224,7 +256,7 @@ export default function Header() {
               <DropdownMenuContent>
                 <DropdownMenuLabel>Escolha sua localização</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                {localStorage.getItem("locationShared") ? (
+                {locationShared === "false" ? (
                   <DropdownMenuItem onClick={() => handleLocationSelect("Brasil")}>
                     Brasil (Todos os cinemas)
                   </DropdownMenuItem>
