@@ -224,23 +224,14 @@ export default function Header() {
               <DropdownMenuContent>
                 <DropdownMenuLabel>Escolha sua localização</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                {locationShared === "false" ? (
+                {localStorage.getItem("locationShared") ? (
                   <DropdownMenuItem onClick={() => handleLocationSelect("Brasil")}>
                     Brasil (Todos os cinemas)
                   </DropdownMenuItem>
                 ) : (
                   <>
-                    <DropdownMenuItem onClick={() => handleLocationSelect("São Paulo, SP")}>
-                      São Paulo, SP
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleLocationSelect("Rio de Janeiro, RJ")}>
-                      Rio de Janeiro, RJ
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleLocationSelect("Belo Horizonte, MG")}>
-                      Belo Horizonte, MG
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleLocationSelect("Brasília, DF")}>
-                      Brasília, DF
+                    <DropdownMenuItem onClick={() => handleLocationSelect("Manaus, AM")}>
+                      Manaus, AM
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
