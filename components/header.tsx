@@ -263,7 +263,7 @@ export default function Header() {
                 ) : (
                   <>
                     <DropdownMenuItem onClick={() => handleLocationSelect("Manaus, AM")}>
-                      Manaus, AM
+                      Manaus/AM
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
