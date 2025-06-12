@@ -51,47 +51,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const login = async (email: string, password: string) => {
-    setIsLoading(true)
+  setIsLoading(true)
+  
+  try {
+    // Simulate API call delay
+    await new Promise((resolve) => setTimeout(resolve, 500))
     
-    try {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 500))
+    // Check for default admin user first (always check this)
+    if (email === "admin@cine.com" && password === "admin123") {
+      const adminUser = {
+        id: "1",
+        name: "Admin User",
+        email: "admin@cine.com",
+        password: "admin123",
+        role: "admin" as const,
+      }
+      setUser(adminUser)
+      localStorage.setItem("user", JSON.stringify(adminUser))
       
+      // Make sure admin is in the users list
       const users = getUsers()
-      const foundUser = users.find(user => 
-        user.email === email && user.password === password
-      )
-
-      if (foundUser) {
-        setUser(foundUser)
-        localStorage.setItem("user", JSON.stringify(foundUser))
-        setIsLoading(false)
-        return true
+      if (!users.some(u => u.email === "admin@cine.com")) {
+        localStorage.setItem("users", JSON.stringify([...users, adminUser]))
       }
-
-      // Check for default admin user (only if no users exist yet)
-      if (users.length === 0 && email === "admin@cine.com" && password === "admin123") {
-        const adminUser = {
-          id: "1",
-          name: "Admin User",
-          email: "admin@cine.com",
-          password: "admin123",
-          role: "admin" as const,
-        }
-        setUser(adminUser)
-        localStorage.setItem("user", JSON.stringify(adminUser))
-        localStorage.setItem("users", JSON.stringify([adminUser]))
-        setIsLoading(false)
-        return true
-      }
-
+      
       setIsLoading(false)
-      return false
-    } catch (error) {
-      setIsLoading(false)
-      return false
+      return true
     }
+    
+    // Then check regular users
+    const users = getUsers()
+    const foundUser = users.find(user => 
+      user.email === email && user.password === password
+    )
+
+    if (foundUser) {
+      setUser(foundUser)
+      localStorage.setItem("user", JSON.stringify(foundUser))
+      setIsLoading(false)
+      return true
+    }
+
+    setIsLoading(false)
+    return false
+  } catch (error) {
+    setIsLoading(false)
+    return false
   }
+}
 
   const register = async (name: string, email: string, password: string) => {
     setIsLoading(true)

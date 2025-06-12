@@ -1,270 +1,115 @@
 "use client"
 
-import type React from "react"
-
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
+import { useState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { Grid, List, Search } from "lucide-react"
+import { Search, SlidersHorizontal } from "lucide-react"
 import MovieCard from "@/components/movie-card"
-import { mockMovies } from "@/lib/mock-data"
-import type { Movie } from "@/lib/types"
+import { useData } from "@/lib/contexts/data-context"
 
 export default function EmBrevePage() {
+  const { movies } = useData()
+  const [filteredMovies, setFilteredMovies] = useState(movies.filter((movie) => movie.isComingSoon))
   const [searchQuery, setSearchQuery] = useState("")
-  const [genreFilter, setGenreFilter] = useState<string>("todos")
-  const [classificationFilter, setClassificationFilter] = useState<string>("todos")
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+  const [sortBy, setSortBy] = useState("releaseDate")
+  const [genreFilter, setGenreFilter] = useState("all")
 
-  // Get all available genres from movies
-  const allGenres = Array.from(new Set(mockMovies.flatMap((movie) => movie.genres)))
+  // Get unique genres from all coming soon movies
+  const allGenres = Array.from(new Set(movies.filter((movie) => movie.isComingSoon).flatMap((movie) => movie.genres)))
 
-  // Get all available classifications from movies
-  const allClassifications = Array.from(new Set(mockMovies.map((movie) => movie.classification)))
+  // Filter and sort movies
+  useEffect(() => {
+    let result = movies.filter((movie) => movie.isComingSoon)
 
-  // Filter movies that are coming soon
-  const comingSoonMovies = mockMovies.filter((movie) => movie.isComingSoon)
+    // Apply search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase()
+      result = result.filter(
+        (movie) =>
+          movie.title.toLowerCase().includes(query) ||
+          movie.director.toLowerCase().includes(query) ||
+          movie.cast.some((actor) => actor.toLowerCase().includes(query)),
+      )
+    }
 
-  // Apply filters
-  const filteredMovies = comingSoonMovies.filter((movie) => {
-    // Search filter
-    const matchesSearch =
-      movie.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      movie.synopsis.toLowerCase().includes(searchQuery.toLowerCase())
+    // Apply genre filter
+    if (genreFilter !== "all") {
+      result = result.filter((movie) => movie.genres.includes(genreFilter))
+    }
 
-    // Genre filter
-    const matchesGenre = genreFilter === "todos" || movie.genres.includes(genreFilter)
+    // Apply sorting
+    if (sortBy === "releaseDate") {
+      result.sort((a, b) => new Date(a.releaseDate).getTime() - new Date(b.releaseDate).getTime())
+    } else if (sortBy === "title") {
+      result.sort((a, b) => a.title.localeCompare(b.title))
+    } else if (sortBy === "popularity") {
+      result.sort((a, b) => b.rating - a.rating)
+    }
 
-    // Classification filter
-    const matchesClassification = classificationFilter === "todos" || movie.classification === classificationFilter
-
-    return matchesSearch && matchesGenre && matchesClassification
-  })
+    setFilteredMovies(result)
+  }, [movies, searchQuery, sortBy, genreFilter])
 
   return (
-    <div className="container py-8 md:py-12">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+    <div className="container px-4 py-8 mx-auto">
+      <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0 mb-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Em Breve</h1>
           <p className="text-muted-foreground mt-1">Fique por dentro dos próximos lançamentos</p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant={viewMode === "grid" ? "default" : "outline"}
-            size="icon"
-            onClick={() => setViewMode("grid")}
-            aria-label="Visualização em grade"
-          >
-            <Grid className="h-4 w-4" />
-          </Button>
-          <Button
-            variant={viewMode === "list" ? "default" : "outline"}
-            size="icon"
-            onClick={() => setViewMode("list")}
-            aria-label="Visualização em lista"
-          >
-            <List className="h-4 w-4" />
-          </Button>
+      </div>
+
+      <div className="flex flex-col space-y-4 md:flex-row md:items-center md:space-y-0 md:space-x-4 mb-8">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder="Buscar por título, diretor ou ator..."
+            className="pl-10"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+        <div className="flex items-center space-x-2">
+          <Select value={genreFilter} onValueChange={setGenreFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Gênero" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos os gêneros</SelectItem>
+              {allGenres.map((genre) => (
+                <SelectItem key={genre} value={genre}>
+                  {genre}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex items-center space-x-2">
+          <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Ordenar por" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="releaseDate">Data de lançamento</SelectItem>
+              <SelectItem value="title">Título</SelectItem>
+              <SelectItem value="popularity">Popularidade</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6 mb-8">
-        <div className="w-full lg:w-64 space-y-4">
-          <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Buscar filmes..."
-              className="pl-8"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Gênero</label>
-            <Select value={genreFilter} onValueChange={setGenreFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Todos os gêneros" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos os gêneros</SelectItem>
-                {allGenres.map((genre) => (
-                  <SelectItem key={genre} value={genre}>
-                    {genre}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Classificação</label>
-            <Select value={classificationFilter} onValueChange={setClassificationFilter}>
-              <SelectTrigger>
-                <SelectValue placeholder="Todas as classificações" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todas as classificações</SelectItem>
-                {allClassifications.map((classification) => (
-                  <SelectItem key={classification} value={classification}>
-                    {classification}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => {
-              setSearchQuery("")
-              setGenreFilter("todos")
-              setClassificationFilter("todos")
-            }}
-          >
-            Limpar filtros
-          </Button>
-        </div>
-
-        <div className="flex-1">
-          {filteredMovies.length > 0 ? (
-            viewMode === "grid" ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-                {filteredMovies.map((movie) => (
-                  <MovieCard key={movie.id} movie={movie} />
-                ))}
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {filteredMovies.map((movie) => (
-                  <MovieListItem key={movie.id} movie={movie} />
-                ))}
-              </div>
-            )
-          ) : (
-            <div className="text-center py-12">
-              <Search className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-              <h3 className="text-xl font-semibold mb-2">Nenhum filme encontrado</h3>
-              <p className="text-muted-foreground">
-                Não encontramos filmes que correspondam aos seus filtros. Tente ajustar os critérios de busca.
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-interface MovieListItemProps {
-  movie: Movie
-}
-
-function MovieListItem({ movie }: MovieListItemProps) {
-  return (
-    <div className="flex gap-4 p-4 border rounded-lg hover:bg-card/50 transition-colors">
-      <div className="relative h-40 w-28 flex-shrink-0 overflow-hidden rounded-md">
-        <img
-          src={movie.posterUrl || "/placeholder.svg?height=450&width=300"}
-          alt={movie.title}
-          className="object-cover w-full h-full"
-        />
-        {movie.rating && (
-          <div className="absolute top-2 right-2 flex items-center gap-1 bg-black/70 text-yellow-400 text-xs font-medium px-2 py-1 rounded-full">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-3 w-3"
-            >
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-            </svg>
-            <span>{movie.rating}</span>
-          </div>
-        )}
-        <Badge className="absolute top-2 left-2 bg-primary text-xs">Em Breve</Badge>
-      </div>
-      <div className="flex-1">
-        <h3 className="font-semibold text-lg">{movie.title}</h3>
-        <div className="flex flex-wrap gap-2 my-2">
-          <Badge variant="outline" className="text-xs">
-            {movie.classification}
-          </Badge>
-          {movie.genres.map((genre) => (
-            <Badge key={genre} variant="outline" className="text-xs">
-              {genre}
-            </Badge>
+      {filteredMovies.length > 0 ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+          {filteredMovies.map((movie) => (
+            <MovieCard key={movie.id} movie={movie} />
           ))}
         </div>
-        <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
-          <div className="flex items-center">
-            <Clock className="mr-1 h-4 w-4" />
-            <span>{movie.duration} min</span>
-          </div>
-          <div className="flex items-center">
-            <Calendar className="mr-1 h-4 w-4" />
-            <span>Estreia: {movie.releaseDate}</span>
-          </div>
+      ) : (
+        <div className="text-center py-12">
+          <h3 className="text-lg font-medium mb-2">Nenhum filme encontrado</h3>
+          <p className="text-muted-foreground">Tente ajustar seus filtros ou buscar por outro termo.</p>
         </div>
-        <p className="text-sm text-muted-foreground line-clamp-2">{movie.synopsis}</p>
-        <div className="mt-3">
-          <Button asChild size="sm">
-            <a href={`/filmes/${movie.id}`}>Ver detalhes</a>
-          </Button>
-        </div>
-      </div>
+      )}
     </div>
-  )
-}
-
-function Clock(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <circle cx="12" cy="12" r="10" />
-      <polyline points="12 6 12 12 16 14" />
-    </svg>
-  )
-}
-
-function Calendar(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-      <line x1="16" x2="16" y1="2" y2="6" />
-      <line x1="8" x2="8" y1="2" y2="6" />
-      <line x1="3" x2="21" y1="10" y2="10" />
-    </svg>
   )
 }

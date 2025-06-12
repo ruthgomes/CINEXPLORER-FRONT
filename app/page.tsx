@@ -1,19 +1,22 @@
+"use client"
+
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { CalendarDays, Star, Ticket } from 'lucide-react'
+import { CalendarDays, Star, Ticket } from "lucide-react"
 import MovieCard from "@/components/movie-card"
 import CinemaCard from "@/components/cinema-card"
 import HeroSection from "@/components/hero-section"
 import LocationPermission from "@/components/location-permission"
-import { mockMovies, mockCinemas } from "@/lib/mock-data"
+import { useData } from "@/lib/contexts/data-context"
 
 export default function Home() {
-  const featuredMovies = mockMovies.slice(0, 6)
-  const comingSoonMovies = mockMovies.slice(6, 12)
-  const nearbyCinemas = mockCinemas.slice(0, 4)
+  const { movies, cinemas } = useData()
+  const featuredMovies = movies.filter((movie) => !movie.isComingSoon).slice(0, 6)
+  const comingSoonMovies = movies.filter((movie) => movie.isComingSoon).slice(0, 6)
+  const nearbyCinemas = cinemas.slice(0, 4)
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -142,7 +145,7 @@ export default function Home() {
           <div className="flex flex-col md:flex-row items-center justify-center gap-8">
             <div className="md:w-1/2 lg:w-1/3">
               <Image
-                src="/cinexplorer.png"
+                src="/placeholder.svg?height=600&width=300"
                 alt="CineXplorer App"
                 width={300}
                 height={600}

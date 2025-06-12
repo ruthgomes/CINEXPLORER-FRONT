@@ -1,223 +1,171 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { useToast } from "@/components/ui/use-toast"
-import { Calendar, Edit, Plus, Search, Trash2 } from "lucide-react"
-import { useAuth } from "@/components/auth-provider"
-import { mockSessions, mockMovies, mockCinemas } from "@/lib/mock-data"
-import type { Session } from "@/lib/types"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import { Edit, Plus, Search, Trash2 } from "lucide-react"
+import { useData } from "@/lib/contexts/data-context"
 
-export default function AdminSessionsPage() {
-  const router = useRouter()
-  const { toast } = useToast()
-  const { user, isLoading } = useAuth()
-  const [sessions, setSessions] = useState<Session[]>([])
+export default function AdminSessoesPage() {
+  const { movies, cinemas, sessions, deleteSession } = useData()
   const [searchQuery, setSearchQuery] = useState("")
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [sessionToDelete, setSessionToDelete] = useState<Session | null>(null)
-
-  useEffect(() => {
-    if (!isLoading && (!user || user.role !== "admin")) {
-      toast({
-        variant: "destructive",
-        title: "Acesso negado",
-        description: "Você não tem permissão para acessar esta página.",
-      })
-      router.push("/")
-      return
-    }
-
-    // Load sessions
-    setSessions(mockSessions)
-  }, [user, isLoading, router, toast])
+  const [deleteId, setDeleteId] = useState<string | null>(null)
 
   const filteredSessions = sessions.filter((session) => {
-    const movie = mockMovies.find((m) => m.id === session.movieId)
-    const cinema = mockCinemas.find((c) => c.id === session.cinemaId)
+    const movie = movies.find((m) => m.id === session.movieId)
+    const cinema = cinemas.find((c) => c.id === session.cinemaId)
 
+    if (!movie || !cinema) return false
+
+    const searchLower = searchQuery.toLowerCase()
     return (
-      movie?.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      cinema?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      session.date.includes(searchQuery) ||
-      session.time.includes(searchQuery) ||
-      session.roomName.toLowerCase().includes(searchQuery.toLowerCase())
+      movie.title.toLowerCase().includes(searchLower) ||
+      cinema.name.toLowerCase().includes(searchLower) ||
+      session.date.toLowerCase().includes(searchLower) ||
+      session.time.toLowerCase().includes(searchLower)
     )
   })
 
-  const handleDeleteClick = (session: Session) => {
-    setSessionToDelete(session)
-    setDeleteDialogOpen(true)
-  }
-
-  const handleDeleteConfirm = () => {
-    if (sessionToDelete) {
-      // In a real app, this would call an API to delete the session
-      setSessions(sessions.filter((s) => s.id !== sessionToDelete.id))
-
-      toast({
-        title: "Sessão excluída",
-        description: `A sessão foi excluída com sucesso.`,
-      })
-
-      setDeleteDialogOpen(false)
-      setSessionToDelete(null)
+  const handleDelete = () => {
+    if (deleteId) {
+      deleteSession(deleteId)
+      setDeleteId(null)
     }
   }
 
   const getMovieTitle = (movieId: string) => {
-    const movie = mockMovies.find((m) => m.id === movieId)
+    const movie = movies.find((m) => m.id === movieId)
     return movie ? movie.title : "Filme não encontrado"
   }
 
   const getCinemaName = (cinemaId: string) => {
-    const cinema = mockCinemas.find((c) => c.id === cinemaId)
+    const cinema = cinemas.find((c) => c.id === cinemaId)
     return cinema ? cinema.name : "Cinema não encontrado"
   }
 
-  if (isLoading) {
-    return (
-      <div className="container py-12 flex items-center justify-center">
-        <p>Carregando...</p>
-      </div>
-    )
-  }
-
   return (
-    <div className="container py-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+    <div className="flex-1 space-y-6 p-6 md:p-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Gerenciar Sessões</h1>
-          <p className="text-muted-foreground mt-1">Adicione, edite ou remova sessões de filmes</p>
+          <h1 className="text-3xl font-bold tracking-tight">Sessões</h1>
+          <p className="text-muted-foreground">Gerencie as sessões de filmes</p>
         </div>
         <Button asChild>
           <Link href="/admin/sessoes/nova">
-            <Plus className="h-4 w-4 mr-2" />
-            Adicionar Sessão
+            <Plus className="mr-2 h-4 w-4" />
+            Nova Sessão
           </Link>
         </Button>
       </div>
 
-      <div className="flex items-center mb-6">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Buscar sessões..."
-            className="pl-8"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          placeholder="Buscar por filme, cinema ou data..."
+          className="pl-10 max-w-md"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
       </div>
 
-      {filteredSessions.length > 0 ? (
-        <div className="border rounded-lg overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[100px]">ID</TableHead>
-                <TableHead>Filme</TableHead>
-                <TableHead className="hidden md:table-cell">Cinema</TableHead>
-                <TableHead className="hidden md:table-cell">Sala</TableHead>
-                <TableHead className="hidden md:table-cell">Data</TableHead>
-                <TableHead className="hidden md:table-cell">Horário</TableHead>
-                <TableHead className="hidden md:table-cell">Preço</TableHead>
-                <TableHead className="text-right">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredSessions.map((session) => (
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Filme</TableHead>
+              <TableHead>Cinema</TableHead>
+              <TableHead>Data</TableHead>
+              <TableHead>Horário</TableHead>
+              <TableHead>Sala</TableHead>
+              <TableHead>Tipo</TableHead>
+              <TableHead>Preço</TableHead>
+              <TableHead className="text-right">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredSessions.length > 0 ? (
+              filteredSessions.map((session) => (
                 <TableRow key={session.id}>
-                  <TableCell className="font-medium">{session.id}</TableCell>
+                  <TableCell className="font-medium">{getMovieTitle(session.movieId)}</TableCell>
+                  <TableCell>{getCinemaName(session.cinemaId)}</TableCell>
+                  <TableCell>{new Date(session.date).toLocaleDateString("pt-BR")}</TableCell>
+                  <TableCell>{session.time}</TableCell>
                   <TableCell>
-                    <div className="font-medium">{getMovieTitle(session.movieId)}</div>
-                    <div className="md:hidden text-sm text-muted-foreground">
-                      {getCinemaName(session.cinemaId)} • {session.date.split("-").reverse().join("/")} • {session.time}
-                    </div>
+                    <Badge variant="outline">Sala {session.room?.number}</Badge>
                   </TableCell>
-                  <TableCell className="hidden md:table-cell">{getCinemaName(session.cinemaId)}</TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    <div className="flex items-center gap-2">
-                      {session.roomName}
-                      <Badge variant="outline" className="text-xs">
-                        {session.roomType}
-                      </Badge>
-                    </div>
+                  <TableCell>
+                    <Badge
+                      variant="outline"
+                      className={
+                        session.room?.type === "IMAX"
+                          ? "bg-blue-500/10 text-blue-500 border-blue-500/20"
+                          : session.room?.type === "4DX"
+                            ? "bg-purple-500/10 text-purple-500 border-purple-500/20"
+                            : session.room?.type === "VIP"
+                              ? "bg-yellow-500/10 text-yellow-500 border-yellow-500/20"
+                              : "bg-gray-500/10 text-gray-500 border-gray-500/20"
+                      }
+                    >
+                      {session.room?.type || "Padrão"}
+                    </Badge>
                   </TableCell>
-                  <TableCell className="hidden md:table-cell">{session.date.split("-").reverse().join("/")}</TableCell>
-                  <TableCell className="hidden md:table-cell">{session.time}</TableCell>
-                  <TableCell className="hidden md:table-cell">
-                    R$ {session.price.toFixed(2).replace(".", ",")}
-                  </TableCell>
+                  <TableCell>R$ {session.price.toFixed(2)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <Button asChild variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" asChild>
                         <Link href={`/admin/sessoes/${session.id}`}>
                           <Edit className="h-4 w-4" />
                           <span className="sr-only">Editar</span>
                         </Link>
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDeleteClick(session)}>
+                      <Button variant="ghost" size="icon" onClick={() => setDeleteId(session.id)}>
                         <Trash2 className="h-4 w-4" />
                         <span className="sr-only">Excluir</span>
                       </Button>
                     </div>
                   </TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      ) : (
-        <div className="text-center py-12 border rounded-lg">
-          <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-xl font-semibold mb-2">Nenhuma sessão encontrada</h3>
-          <p className="text-muted-foreground mb-6">
-            {searchQuery
-              ? "Não encontramos sessões que correspondam à sua busca."
-              : "Não há sessões cadastradas no sistema."}
-          </p>
-          <Button asChild>
-            <Link href="/admin/sessoes/nova">
-              <Plus className="h-4 w-4 mr-2" />
-              Adicionar Sessão
-            </Link>
-          </Button>
-        </div>
-      )}
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={8} className="h-24 text-center">
+                  Nenhuma sessão encontrada.
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
 
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Excluir sessão</DialogTitle>
-            <DialogDescription>
+      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
               Tem certeza que deseja excluir esta sessão? Esta ação não pode ser desfeita.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button variant="destructive" onClick={handleDeleteConfirm}>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
               Excluir
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
