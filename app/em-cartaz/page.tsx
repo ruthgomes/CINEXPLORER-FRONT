@@ -27,8 +27,8 @@ export default function EmCartazPage() {
       result = result.filter(
         (movie) =>
           movie.title.toLowerCase().includes(query) ||
-          movie.director.toLowerCase().includes(query) ||
-          movie.cast.some((actor) => actor.toLowerCase().includes(query)),
+          (movie.director && movie.director.toLowerCase().includes(query)) ||
+          (movie.cast && movie.cast.some((actor) => actor && actor.toLowerCase().includes(query))),
       )
     }
 
@@ -39,7 +39,7 @@ export default function EmCartazPage() {
 
     // Apply sorting
     if (sortBy === "popularity") {
-      result.sort((a, b) => b.rating - a.rating)
+      result.sort((a, b) => (b.rating || 0) - (a.rating || 0))
     } else if (sortBy === "title") {
       result.sort((a, b) => a.title.localeCompare(b.title))
     } else if (sortBy === "releaseDate") {

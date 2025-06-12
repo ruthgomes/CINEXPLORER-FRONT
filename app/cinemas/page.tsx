@@ -17,9 +17,28 @@ export default function CinemasPage() {
 
   // Get user location if they've shared it
   useEffect(() => {
-    const storedLocation = localStorage.getItem("userLocation")
-    if (storedLocation) {
-      setUserLocation(JSON.parse(storedLocation))
+    try {
+      const storedLocation = localStorage.getItem("userLocation")
+      if (storedLocation) {
+        // Check if the stored value is valid JSON
+        if (storedLocation.startsWith("{") && storedLocation.endsWith("}")) {
+          const location = JSON.parse(storedLocation)
+          // Validate that it has the expected structure
+          if (location && typeof location.lat === "number" && typeof location.lng === "number") {
+            setUserLocation(location)
+          } else {
+            // Invalid structure, remove it
+            localStorage.removeItem("userLocation")
+          }
+        } else {
+          // Not valid JSON, remove it
+          localStorage.removeItem("userLocation")
+        }
+      }
+    } catch (error) {
+      console.error("Error parsing stored location:", error)
+      // Remove invalid data
+      localStorage.removeItem("userLocation")
     }
   }, [])
 
@@ -32,9 +51,9 @@ export default function CinemasPage() {
       const query = searchQuery.toLowerCase()
       result = result.filter(
         (cinema) =>
-          cinema.name.toLowerCase().includes(query) ||
-          cinema.address.toLowerCase().includes(query) ||
-          cinema.city.toLowerCase().includes(query),
+          (cinema.name && cinema.name.toLowerCase().includes(query)) ||
+          (cinema.address && cinema.address.toLowerCase().includes(query)) ||
+          (cinema.city && cinema.city.toLowerCase().includes(query)),
       )
     }
 
@@ -48,7 +67,7 @@ export default function CinemasPage() {
     } else if (sortBy === "name") {
       result.sort((a, b) => a.name.localeCompare(b.name))
     } else if (sortBy === "rating") {
-      result.sort((a, b) => b.rating - a.rating)
+      result.sort((a, b) => (b.rating || 0) - (a.rating || 0))
     }
 
     setFilteredCinemas(result)
@@ -69,6 +88,28 @@ export default function CinemasPage() {
     return R * c
   }
 
+  const handleLocationRequest = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const location = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          }
+          setUserLocation(location)
+          try {
+            localStorage.setItem("userLocation", JSON.stringify(location))
+          } catch (error) {
+            console.error("Error saving location:", error)
+          }
+        },
+        (error) => {
+          console.error("Error getting location:", error)
+        },
+      )
+    }
+  }
+
   return (
     <div className="container px-4 py-8 mx-auto">
       <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0 mb-8">
@@ -78,27 +119,7 @@ export default function CinemasPage() {
         </div>
 
         {!userLocation && (
-          <Button
-            variant="outline"
-            className="flex items-center gap-2"
-            onClick={() => {
-              if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                  (position) => {
-                    const location = {
-                      lat: position.coords.latitude,
-                      lng: position.coords.longitude,
-                    }
-                    setUserLocation(location)
-                    localStorage.setItem("userLocation", JSON.stringify(location))
-                  },
-                  (error) => {
-                    console.error("Error getting location:", error)
-                  },
-                )
-              }
-            }}
-          >
+          <Button variant="outline" className="flex items-center gap-2" onClick={handleLocationRequest}>
             <MapPin className="h-4 w-4" />
             Compartilhar localização
           </Button>

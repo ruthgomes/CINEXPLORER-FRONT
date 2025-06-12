@@ -27,8 +27,8 @@ export default function EmBrevePage() {
       result = result.filter(
         (movie) =>
           movie.title.toLowerCase().includes(query) ||
-          movie.director.toLowerCase().includes(query) ||
-          movie.cast.some((actor) => actor.toLowerCase().includes(query)),
+          (movie.director && movie.director.toLowerCase().includes(query)) ||
+          (movie.cast && movie.cast.some((actor) => actor && actor.toLowerCase().includes(query))),
       )
     }
 
